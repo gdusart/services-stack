@@ -53,6 +53,7 @@ services:
              prometheus_monitoring['enable'] = false
              postgresql['shared_buffers'] = "512MB"
              sidekiq['concurrency'] = 5 
+             unicorn['worker_processes'] = 3
          ports:
            - '8022:80'
          volumes:
