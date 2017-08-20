@@ -82,3 +82,28 @@ services:
           - /var/run/docker.sock:/var/run/docker.sock
          volumes_from:
           - nginx-proxy
+
+        cloud:
+         image: nextcloud:${NEXTCLOUD_VERSION}
+         restart: always
+         mem_limit: 2GB 
+         links: 
+           - cloud-db
+         environment:
+           - VIRTUAL_HOST=cloud.${BASE_HOST_NAME}
+           - LETSENCRYPT_EMAIL= ${EMAIL}
+           - LETSENCRYPT_HOST=cloud.${BASE_HOST_NAME}
+         volumes:
+           - /srv/docker/nextcloud:/var/www/html
+
+        cloud-db:
+         image: mariadb
+         restart: always
+         mem_limit: 2GB
+         volumes:
+           - /data/nextcloud-db:/var/lib/mysql
+         environment:
+           - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_DB_ROOT_PASSWD}
+           - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+           - MYSQL_DATABASE=nextcloud
+           - MYSQL_USER=nextcloud    
