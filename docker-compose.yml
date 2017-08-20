@@ -10,10 +10,11 @@ services:
              - ${AIRSONIC_PLAYLISTS_FOLDER}:/airsonic/playlists
              - ${AIRSONIC_PODCASTS_FOLDER}:/airsonic/podcasts
          environment:
-              - "TZ=${TIMEZONE}"
               - VIRTUAL_HOST=music.${BASE_HOST_NAME}
               - LETSENCRYPT_HOST=music.${BASE_HOST_NAME}
               - LETSENCRYPT_EMAIL=${EMAIL}
+         volumes:
+              - ${TIMEZONE_FILE}:/etc/localtime:ro
 
         rutorrent:
          restart: always
@@ -27,9 +28,9 @@ services:
               - ${RUTORRENT_CONFIG_DIR}:/config
               - ${RUTORRENT_DOWNLOAD_DIR}:/downloads
          environment:
-              - "TZ=${TIMEZONE}"
-              - "PGID=${RUTORRENT_DOWNLOAD_GID}"
-              - "PUID=${RUTORRENT_DOWNLOAD_UID}"
+              - TZ=${TIMEZONE}
+              - PGID=${RUTORRENT_DOWNLOAD_GID}
+              - PUID=${RUTORRENT_DOWNLOAD_UID}
               - VIRTUAL_HOST=torrent.${BASE_HOST_NAME}
               - VIRTUAL_PORT=80
               - LETSENCRYPT_HOST=torrent.${BASE_HOST_NAME}
@@ -45,6 +46,7 @@ services:
            LETSENCRYPT_EMAIL: '${EMAIL}'
            VIRTUAL_HOST: 'gitlab.${BASE_HOST_NAME}'
            VIRTUAL_PORT: '80'
+           TZ: '${TIMEZONE}'
            GITLAB_OMNIBUS_CONFIG: |
              external_url 'https://gitlab.${BASE_HOST_NAME}'
              nginx['listen_port'] = 80
@@ -65,6 +67,8 @@ services:
          restart: always
          image: jwilder/nginx-proxy
          mem_limit: 512MB
+         environment:
+          - TZ=${TIMEZONE}       
          ports:
           - "80:80"
           - "443:443"
@@ -80,6 +84,7 @@ services:
          volumes:
           - /srv/docker/nginx/certs:/etc/nginx/certs:rw
           - /var/run/docker.sock:/var/run/docker.sock
+          - ${TIMEZONE_FILE}:/etc/localtime:ro
          volumes_from:
           - nginx-proxy
 
@@ -90,6 +95,7 @@ services:
          links: 
            - cloud-db
          environment:
+           - TZ=${TIMEZONE}
            - VIRTUAL_HOST=cloud.${BASE_HOST_NAME}
            - LETSENCRYPT_EMAIL= ${EMAIL}
            - LETSENCRYPT_HOST=cloud.${BASE_HOST_NAME}
@@ -103,6 +109,7 @@ services:
          volumes:
            - /data/nextcloud-db:/var/lib/mysql
          environment:
+           - TZ=${TIMEZONE}
            - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_DB_ROOT_PASSWD}
            - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
            - MYSQL_DATABASE=nextcloud
